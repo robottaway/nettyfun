@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.StaticHttpHandler;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
@@ -27,6 +28,7 @@ public class JerseyGrizzlyApp
 		URI base = UriBuilderImpl.fromUri("http://localhost/").port(port).build();
 		ResourceConfig rc = new PackagesResourceConfig("com.blueleftistconstructor.mb");
 		HttpServer server = GrizzlyServerFactory.createHttpServer(base, rc);
+		server.getServerConfiguration().addHttpHandler(new StaticHttpHandler("static"), "/static");
 		System.in.read();
 		server.stop();
 	}

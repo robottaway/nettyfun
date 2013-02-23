@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>Netty Fun!</title>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+</head>
+<body>
+<script>
+var ws = null;
+$(document).ready(function($) {
+    $.ajaxSetup({
+        type: "POST",
+        data: {},
+        dataType: 'json',
+        xhrFields: {
+           withCredentials: true
+        },
+        crossDomain: true
+    });
+    var authurl = "http://mb.blueleftistconstructor.com:8082/user";
+    var wsurl = 'ws://farm.blueleftistconstructor.com:8080/ws';
+    $.post(authurl); // get auth cookie
+    ws = new WebSocket(wsurl);
+    ws.onmessage = function(e) {
+        console.log(e.data);
+    };
+    ws.onopen = function(e) {
+    	ws.send('Now we begin');
+    }
+});
+</script>
+</body> 
+</html>

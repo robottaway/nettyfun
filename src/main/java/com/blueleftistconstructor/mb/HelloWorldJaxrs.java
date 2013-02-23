@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
  * @author rob
  *
  */
-@Path("/hello")
+@Path("/user")
 public class HelloWorldJaxrs
 {
 	@OPTIONS
@@ -25,7 +25,7 @@ public class HelloWorldJaxrs
 	
 	@GET
 	@Produces("text/plain")
-	public String getHello() 
+	public String details() 
 	{
 		return "Hello World!";
 	}
@@ -35,14 +35,11 @@ public class HelloWorldJaxrs
 	public Response authenticate() 
 	{
 		Cookie c1 = new Cookie("user", "rob", "/", ".blueleftistconstructor.com");
-		Cookie c2 = new Cookie("user", "rob", "/", "farm.blueleftistconstructor.com");
 		NewCookie nc1 = new NewCookie(c1, null, 3600, false);
-		NewCookie nc2 = new NewCookie(c2, null, 3600, false);
 		return Response.ok("Hello World!")
-				.header("Access-Control-Allow-Origin", "http://farm.blueleftistconstructor.com")
+				.header("Access-Control-Allow-Origin", "http://farm.blueleftistconstructor.com:8082")
 				.header("Access-Control-Allow-Credentials", "true")
 				.cookie(nc1)
-				.cookie(nc2)
 				.build();
 	}
 }
