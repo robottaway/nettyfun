@@ -27,6 +27,8 @@ public class HttpAuthHandler extends ChannelInboundMessageHandlerAdapter<HttpReq
 		
 		if (req.getHeaderNames().contains("Cookie")) {
 			// handle cookie based auth
+			String cookie = req.getHeader("Cookie");
+			System.out.printf("Got cookie: %s\n", cookie);
 		}
 		else if (req.getHeaderNames().contains("Authorization")) {
 			String value = req.getHeader("Authorization");
