@@ -47,7 +47,7 @@ public class NettyWebsockets
 									new HttpResponseEncoder(),
 									new HttpAuthHandler(),
 									new WebSocketServerProtocolHandler(""),
-									new CustomTextFrameHandler());
+									new UserApplicationHandler());
 						}
 					}
 				);

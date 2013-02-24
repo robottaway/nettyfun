@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
  *
  */
 @Path("/user")
-public class HelloWorldJaxrs
+public class UserAuth
 {
 	@OPTIONS
 	public Response getHelloOptions() {
