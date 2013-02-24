@@ -5,27 +5,39 @@
 </head>
 <body>
 <script>
+var authurl = "http://mb.blueleftistconstructor.com:8082/user";
+var wsurl = 'ws://farm.blueleftistconstructor.com:8080/ws';
 var ws = null;
 $(document).ready(function($) {
-    $.ajaxSetup({
-        type: "POST",
-        data: {},
-        dataType: 'json',
-        xhrFields: {
-           withCredentials: true
-        },
-        crossDomain: true
-    });
-    var authurl = "http://mb.blueleftistconstructor.com:8082/user";
-    var wsurl = 'ws://farm.blueleftistconstructor.com:8080/ws';
+	// setup calls for credential based CORs
+	var methods = ['POST', 'PUT', 'DELETE'];
+	$.each(methods, function(i, method) {
+		$.ajaxSetup({
+	        type: "POST",
+	        data: {},
+	        dataType: 'json',
+	        xhrFields: {
+	           withCredentials: true
+	        },
+	        crossDomain: true
+	    });
+	});
+
     $.post(authurl); // get auth cookie
     ws = new WebSocket(wsurl);
+    
+    // when message received call this function
     ws.onmessage = function(e) {
         console.log(e.data);
     };
+    
+    // send a message on begin
     ws.onopen = function(e) {
     	ws.send('Now we begin');
     }
+    
+    // remove auththentication
+    $.ajax({ url: authurl, type: 'DELETE'})
 });
 </script>
 </body> 
