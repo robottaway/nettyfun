@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
  * @author rob
  *
  */
-@Path("/user")
+@Path("/user/auth")
 public class UserAuth
 {
 	@OPTIONS
