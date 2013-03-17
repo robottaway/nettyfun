@@ -1,8 +1,5 @@
 package com.blueleftistconstructor.web;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import org.glassfish.grizzly.http.Cookie;
@@ -10,6 +7,7 @@ import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.CookiesBuilder;
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
+
 
 /**
  * Our web session which contains logic to maintain cookie for browser.
@@ -19,7 +17,7 @@ import org.joda.time.Seconds;
  * @author rob
  *
  */
-public class WebSession implements Map<String, Object>
+public class WebSession
 {
 	private String sessionId = null;
 	
@@ -45,7 +43,9 @@ public class WebSession implements Map<String, Object>
 	
 	private boolean secure = false;
 	
-	private Cookie cookie = null;
+	private SignedCookie cookie = null;
+	
+	private String cookieSecret = "sljkaf;asjdkfas";
 	
 	/*
 	 * Encryption and security fields. These are used to encode session info so
@@ -57,7 +57,7 @@ public class WebSession implements Map<String, Object>
 	 * Create a new web session, the cookie will be created using defaults.
 	 */
 	public WebSession() {
-		this.cookie = new Cookie(cookieName, sessionId);
+		this.cookie = new SignedCookie(cookieName, sessionId, cookieSecret);
 		createSessionId(true); // will update cookie also
 	}
 	
@@ -67,7 +67,7 @@ public class WebSession implements Map<String, Object>
 	 */
 	public WebSession(String cookieHeader) throws SessionNotInCookieHeader {
 		this.cookie = getSessionCookieFromCookieHeader(cookieHeader);
-		this.sessionId = cookie.getValue();
+		this.sessionId = cookie.getVerifiedValue();
 		setCookieValuesFromSession();
 	}
 	
@@ -86,7 +86,7 @@ public class WebSession implements Map<String, Object>
 		this.cookieExpires = expires;
 		this.httpOnly = httpOnly;
 		this.secure = secure;
-		this.cookie = new Cookie(cookieName, sessionId);
+		this.cookie = new SignedCookie(cookieName, sessionId, cookieSecret);
 		createSessionId(true); // will update cookie also
 	}
 	
@@ -105,7 +105,7 @@ public class WebSession implements Map<String, Object>
 		this.httpOnly = httpOnly;
 		this.secure = secure;
 		this.cookie = getSessionCookieFromCookieHeader(cookieHeader);
-		this.sessionId = cookie.getValue();
+		this.sessionId = cookie.getVerifiedValue();
 		setCookieValuesFromSession();
 	}
 	
@@ -113,11 +113,11 @@ public class WebSession implements Map<String, Object>
 	 * Take the whole cookie header from a request and parse and retrieve 
 	 * session value.
 	 */
-	private Cookie getSessionCookieFromCookieHeader(String cookieHeader) throws SessionNotInCookieHeader {
+	private SignedCookie getSessionCookieFromCookieHeader(String cookieHeader) throws SessionNotInCookieHeader {
 		Cookies cks = CookiesBuilder.server().parse(cookieHeader).build();
 		for (Cookie cookie : cks.get()) {
 			if (cookie.getName().equals(cookieName)) {
-				return cookie;
+				return new SignedCookie(cookie.getName(), cookie.getValue(), cookieSecret);
 			}
 		}
 		throw new SessionNotInCookieHeader();
@@ -128,7 +128,7 @@ public class WebSession implements Map<String, Object>
 	 */
 	private void setCookieValuesFromSession() {
 		if (cookie == null) throw new IllegalStateException("No Cookie!");
-		cookie.setValue(sessionId);
+		cookie.setSignedValue(sessionId);
 		cookie.setPath(cookiePath);
 		cookie.setDomain(cookieDomain);
 		
@@ -183,92 +183,8 @@ public class WebSession implements Map<String, Object>
 		return UUID.randomUUID().toString();
 	}
 
-	/*
-	 * HERE begins the methods for java.util.Map interface.
-	 */
-	
-	
-	@Override
-	public void clear()
+	public String getSessionId()
 	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean containsKey(Object key)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean containsValue(Object value)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Set<java.util.Map.Entry<String, Object>> entrySet()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object get(Object key)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isEmpty()
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Set<String> keySet()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object put(String key, Object value)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void putAll(Map<? extends String, ? extends Object> m)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Object remove(Object key)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int size()
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Collection<Object> values()
-	{
-		// TODO Auto-generated method stub
-		return null;
+		return sessionId;
 	}
 }
