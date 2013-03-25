@@ -12,7 +12,6 @@ import org.glassfish.grizzly.http.Cookie;
  * Extend the Grizzly cookie and allow signing the value.
  * 
  * @author rob
- *
  */
 public class SignedCookie extends Cookie
 {

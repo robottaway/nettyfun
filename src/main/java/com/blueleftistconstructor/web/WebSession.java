@@ -5,8 +5,6 @@ import java.util.UUID;
 import org.glassfish.grizzly.http.Cookie;
 import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.CookiesBuilder;
-import org.joda.time.DateTime;
-import org.joda.time.Seconds;
 
 
 /**
@@ -15,18 +13,11 @@ import org.joda.time.Seconds;
  * Browser cookie will also contain the session data, so that we can
  * 
  * @author rob
- *
  */
 public class WebSession
 {
 	private String sessionId = null;
-	
-	private DateTime createdTime = null;
-	
-	private DateTime accessedTime = null;
-	
-	private DateTime d = null;
-	
+		
 	/*
 	 * Following are cookie specific values. The cookie is used to track the
 	 * user's session.
@@ -37,9 +28,9 @@ public class WebSession
 	
 	private String cookieDomain = null;
 	
-	private DateTime cookieExpires = null;
+	private int cookieExpires;
 	
-	private boolean httpOnly = false; // java not supporting of course
+	private boolean httpOnly = false;
 	
 	private boolean secure = false;
 	
@@ -54,31 +45,13 @@ public class WebSession
 	private String encryptionKey = null;
 	
 	/**
-	 * Create a new web session, the cookie will be created using defaults.
-	 */
-	public WebSession() {
-		this.cookie = new SignedCookie(cookieName, sessionId, cookieSecret);
-		createSessionId(true); // will update cookie also
-	}
-	
-	/**
-	 * Create existing web session using the given cookie header to find the 
-	 * existing session.
-	 */
-	public WebSession(String cookieHeader) throws SessionNotInCookieHeader {
-		this.cookie = getSessionCookieFromCookieHeader(cookieHeader);
-		this.sessionId = cookie.getVerifiedValue();
-		setCookieValuesFromSession();
-	}
-	
-	/**
 	 * Create a new WebSession object. Must specify the information about the
 	 * cookie used to store the session info browser side.
 	 * 
 	 * This method will not have a cookie member seeing how it is brand new.
 	 */
 	public WebSession(String cookieName, String cookiePath, String cookieDomain,
-			DateTime expires, boolean httpOnly, boolean secure) 
+			int expires, boolean httpOnly, boolean secure) 
 	{
 		this.cookieName = cookieName;
 		this.cookiePath = cookiePath;
@@ -95,7 +68,7 @@ public class WebSession
 	 * for this session or exception).
 	 */
 	public WebSession(String cookieHeader, String cookieName, String cookiePath, String cookieDomain,
-			DateTime expires, boolean httpOnly, boolean secure) 
+			int expires, boolean httpOnly, boolean secure) 
 	throws SessionNotInCookieHeader 
 	{
 		this.cookieName = cookieName;
@@ -131,14 +104,7 @@ public class WebSession
 		cookie.setSignedValue(sessionId);
 		cookie.setPath(cookiePath);
 		cookie.setDomain(cookieDomain);
-		
-		if (cookieExpires != null) {
-			int seconds = 0;
-			Seconds.secondsBetween(DateTime.now(), cookieExpires).getSeconds();
-			if (seconds < 0) seconds = 0;
-			cookie.setMaxAge(seconds);
-		}
-		
+		cookie.setMaxAge(cookieExpires);
 		cookie.setSecure(secure);
 		cookie.setHttpOnly(httpOnly);
 	}

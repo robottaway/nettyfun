@@ -1,8 +1,5 @@
 package com.blueleftistconstructor;
 
-import org.glassfish.grizzly.http.Cookie;
-import org.glassfish.grizzly.http.Cookies;
-import org.glassfish.grizzly.http.CookiesBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -26,29 +23,17 @@ public class CookieParserTest
 	
 	@Test
 	public void parseit() throws SessionNotInCookieHeader {
-		// test that value is generated
-		WebSession ws = new WebSession();
-		Assert.assertTrue(ws.getSessionId() != null && ws.getSessionId().length() > 0);
-		String oldSessionId = ws.getSessionId();
-		String ch = ws.toSetCookieHeaderValue();
-		Cookies cookies = CookiesBuilder.client().parse(ch).build();
-		Cookie ck = cookies.findByName("sid");
-		Assert.assertNotNull(ck);
-		ws = new WebSession(ck.asServerCookieString(), "sid", "/", ".blc.com", null, true, true);
-		Assert.assertEquals(ws.getSessionId(), oldSessionId);
 		
 		// get signed value
-		ws = new WebSession(cookieHeader, "sid", "/", ".blc.com", null, true, true);
+		WebSession ws = new WebSession(cookieHeader, "sid", "/", ".blc.com", 0, true, true);
 		Assert.assertEquals(ws.getSessionId(), sessionId);
 		
 		// NID is not signed
-		ws = new WebSession(cookieHeader, "NID", "/", ".blc.com", null, true, true);
+		ws = new WebSession(cookieHeader, "NID", "/", ".blc.com", 0, true, true);
 		Assert.assertEquals(ws.getSessionId(), null);
-		
-		ws.delete();
-		
+				
 		try {
-			ws = new WebSession(cookieHeader, "notfound", "/", ".blc.com", null, true, true);
+			ws = new WebSession(cookieHeader, "notfound", "/", ".blc.com", 0, true, true);
 			Assert.fail("should have thrown exception");
 		}
 		catch (SessionNotInCookieHeader e) {}

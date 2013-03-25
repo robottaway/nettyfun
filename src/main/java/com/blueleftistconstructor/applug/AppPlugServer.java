@@ -4,9 +4,9 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioEventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpChunkAggregator;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
@@ -15,11 +15,11 @@ import java.net.InetSocketAddress;
 
 
 /**
- * Create a simple websocket server
+ * Create a server that will run App Plugs.
  * 
  * @author rob
  */
-public class NettyWebsockets
+public class AppPlugServer
 {
 	public static void main(String[] args) throws Exception
 	{
@@ -43,10 +43,10 @@ public class NettyWebsockets
 						{
 							ch.pipeline().addLast(
 									new HttpRequestDecoder(),
-									new HttpChunkAggregator(65536),
+									new HttpObjectAggregator(65536),
 									new HttpResponseEncoder(),
 									new HttpAuthHandler(),
-									new WebSocketServerProtocolHandler(""),
+									new WebSocketServerProtocolHandler("/ws"),
 									new UserApplicationHandler());
 						}
 					}

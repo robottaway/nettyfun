@@ -1,18 +1,18 @@
 package com.blueleftistconstructor.mb;
 
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.Cookie;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+
+import com.blueleftistconstructor.web.WebSession;
 
 /**
  * A very simple Jax-RS resource.
  * 
  * @author rob
- *
  */
 @Path("/user/auth")
 public class UserAuth
@@ -28,12 +28,11 @@ public class UserAuth
 	@POST
 	public Response authenticate() 
 	{
-		Cookie c1 = new Cookie("user", "rob", "/", ".blueleftistconstructor.com");
-		NewCookie nc1 = new NewCookie(c1, null, 3600, false);
+		WebSession ws = new WebSession("user", "/", ".blueleftistconstructor.com", 60*60, false, false);
 		return Response.noContent()
 				.header("Access-Control-Allow-Origin", "http://mb.blueleftistconstructor.com:8082")
 				.header("Access-Control-Allow-Credentials", "true")
-				.cookie(nc1)
+				.header("Set-Cookie", ws.toSetCookieHeaderValue())
 				.build();
 	}
 	
@@ -43,14 +42,13 @@ public class UserAuth
 	 * Make sure browser wipes the cookie.
 	 */
 	@DELETE
-	public Response deauthenticate() 
+	public Response deauthenticate(@CookieParam("sid") String authCookie) 
 	{
-		Cookie c1 = new Cookie("user", "", "/", ".blueleftistconstructor.com");
-		NewCookie nc1 = new NewCookie(c1, null, 0, false);
+		WebSession ws = new WebSession("user", "/", ".blueleftistconstructor.com", 0, false, false);
 		return Response.noContent()
 				.header("Access-Control-Allow-Origin", "http://mb.blueleftistconstructor.com:8082")
 				.header("Access-Control-Allow-Credentials", "true")
-				.cookie(nc1)
+				.header("Set-Cookie", ws.toSetCookieHeaderValue())
 				.build();
 	}
 }

@@ -23,22 +23,31 @@ $(document).ready(function($) {
 	    });
 	});
 
-    $.post(authurl); // get auth cookie
-    ws = new WebSocket(wsurl);
-    
-    // when message received call this function
-    ws.onmessage = function(e) {
-        console.log(e.data);
-    };
-    
-    // send a message on begin
-    ws.onopen = function(e) {
-    	ws.send('Now we begin');
+    function registerWebsocket(ws, i) {
+    	var ctr = 0;
+    	ws.onmessage = function(e) {
+    		ctr++;
+    		if (ctr % 2 == 0) {
+    			$('div#msg').text(e.data);
+    		}
+    		else {
+    			$('div#ctr').text(e.data);
+    		}
+        };
+        
+        ws.onopen = function(e) {
+            ws.send(i+': Now we begin');
+        }
     }
     
-    // remove auththentication
-    $.ajax({ url: authurl, type: 'DELETE'})
+    $.post(authurl, function(data) {
+    	for (i = 0; i < 20; i++) {
+    		registerWebsocket(new WebSocket(wsurl), i);
+    	}
+    }); // get auth cookie
 });
 </script>
+<div id="ctr">0</div>
+<div id="msg">hi</div>
 </body> 
 </html>
