@@ -1,12 +1,9 @@
 package com.blueleftistconstructor;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.SerializationUtils;
-import org.msgpack.MessagePack;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -40,43 +37,5 @@ public class SerializationTests
 		Map<String, Object> nm = (Map<String, Object>)SerializationUtils.deserialize(sbs);
 		System.out.println("# of Keys: "+nm.keySet().size());
 	}
-	
-	/**
-	 * Use the messagepack format to serialize the map.
-	 * 
-	 * @throws IOException 
-	 */
-	@Test
-	public void messagePackTest() throws IOException {
-		System.out.println("Going to serialize using messagepack, w/ a map with one String type key and value.");
-		HashMap<String, Object> m = new HashMap<String, Object>();
-		m.put("user", "rob");
-		MessagePack msgpack = new MessagePack();
-		byte[] bs = msgpack.write(m);
-		System.out.println(bs+", "+bs.length);
-		
-		System.out.println("Going to serialize using messagepack, w/ a map with one String type key and one SerializableTestObject value.");
-		m = new HashMap<String, Object>();
-		m.put("user", new SerializableTestObject("rob"));
-		bs = msgpack.write(m);
-		System.out.println(bs+", "+bs.length);
-		
-		SerializableTestObject sto = (SerializableTestObject) msgpack.read(bs, SerializableTestObject.class);
-		Assert.assertEquals(sto.getClass(), SerializableTestObject.class);
-	}
-	
-	@Test
-	public void messagePackObj() throws IOException {
-		MsgpackObj ob = new MsgpackObj();
-		ob.q = "question!?";
-		ob.str = "just a string";
-		MessagePack msgpack = new MessagePack();
-		byte[] bs = msgpack.write(ob);
-		System.out.println("MsgpackObj in bytes: "+bs.length);
-		
-		MsgpackObj ob2 = msgpack.read(bs, MsgpackObj.class);
-		Assert.assertEquals(ob.getClass(), ob2.getClass());
-		Assert.assertEquals(ob.q, ob2.q);
-		Assert.assertEquals(ob.str, ob2.str);
-	}
+
 }
