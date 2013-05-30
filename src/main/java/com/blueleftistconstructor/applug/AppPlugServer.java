@@ -13,6 +13,8 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
 import java.net.InetSocketAddress;
 
+import org.springsource.loaded.agent.SpringLoadedPreProcessor;
+
 
 /**
  * Create a server that will run App Plugs.
@@ -23,6 +25,8 @@ public class AppPlugServer
 {
 	public static void main(String[] args) throws Exception
 	{
+		SpringLoadedPreProcessor.registerGlobalPlugin(new AppRunnerReloader());
+		
 		int port = 8080;
 		if (args.length > 0) {
 			port = Integer.parseInt(args[0]);

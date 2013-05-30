@@ -13,7 +13,15 @@ import com.blueleftistconstructor.web.WebSession;
  * @author rob
  */
 public class HttpAuthHandler extends ChannelInboundMessageHandlerAdapter<FullHttpRequest>
-{
+{	
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+			throws Exception
+	{
+		cause.printStackTrace();
+		super.exceptionCaught(ctx, cause);
+	}
+	
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, FullHttpRequest req)
 			throws Exception
@@ -22,7 +30,7 @@ public class HttpAuthHandler extends ChannelInboundMessageHandlerAdapter<FullHtt
 			String cookie = req.headers().get("Cookie");
 			try {
 				WebSession ws = new WebSession(cookie, "user", "/", ".blueleftistconstructor.com", 60*60*24, false, false);
-				//System.out.println("cookie value: "+ws.getSessionId());
+				ctx.channel().attr(WebSession.webSessionKey).set(ws);
 			}
 			catch (SessionNotInCookieHeader e) {}
 		}

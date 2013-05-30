@@ -1,15 +1,13 @@
 package com.blueleftistconstructor.applug;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundMessageHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.Iterator;
+
+import com.blueleftistconstructor.web.WebSession;
 
 /**
  * Handle the messages from web socket requests.
@@ -23,7 +21,15 @@ public class UserApplicationHandler extends ChannelInboundMessageHandlerAdapter<
 	static AppRunner r = null;
 		
 	boolean registered = false;
-		
+	
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+			throws Exception
+	{
+		cause.printStackTrace();
+		super.exceptionCaught(ctx, cause);
+	}
+
 	synchronized static void createThread() {
 		if (r != null) return;
 		r = new AppRunner();
@@ -37,6 +43,10 @@ public class UserApplicationHandler extends ChannelInboundMessageHandlerAdapter<
 		registered = true;
 	}
 	
+	/**
+	 * When a message is sent into the app by the connected user this is 
+	 * invoked.
+	 */
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame frame) throws Exception
 	{
@@ -46,99 +56,16 @@ public class UserApplicationHandler extends ChannelInboundMessageHandlerAdapter<
 		if (registered == false) {
 			register(ctx);
 		}
-	}
-	
-	public static class AppRunner implements Runnable
-	{
-		List<ChannelHandlerContext> ctxs = new ArrayList<ChannelHandlerContext>();
-				
-		int ctr = 0;
 		
-		String[] messages = {"toodles!", "siyonara!", "bonjour" };
+		WebSession sess = ctx.channel().attr(WebSession.webSessionKey).get();
+		if (sess != null) System.out.println("Got session id: "+sess.getSessionId());
 		
-		ReadWriteLock lk = new ReentrantReadWriteLock(true);
-		
-		private class Mo implements ChannelFutureListener {
-
-			ChannelHandlerContext ctx;
-			
-			public Mo(ChannelHandlerContext ctx) {
-				this.ctx = ctx;
-			}
-			
-			@Override
-			public void operationComplete(ChannelFuture future)
-					throws Exception
-			{
-				lk.writeLock().lock();
-				try {
-					ctxs.remove(ctx);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-				finally {
-					lk.writeLock().unlock();
-				}
-			}
-		}
-		
-		public void addCtx(final ChannelHandlerContext ctx) {
-			lk.writeLock().lock();
-			try {
-				ctxs.add(ctx);
-				ctx.channel().closeFuture().addListener(new Mo(ctx));	
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-			finally {
-				lk.writeLock().unlock();
-			}
-		}
-		
-		private boolean none = true;
-		
-		protected void send() {
-			lk.readLock().lock();
-			try {
-				if (ctxs.size() == 0 && !none) {
-					none = true;
-					System.out.println("Back to nada!");
-				}
-				else if (ctxs.size() > 0 && none){
-					none = false;
-					System.out.println("Got some now!");
-				}
-				ctr++;
-				for (ChannelHandlerContext ctx : ctxs) {
-					ctx.channel().write(new TextWebSocketFrame(""+ctr));
-					String msg = messages[ctr % messages.length];
-					ctx.channel().write(new TextWebSocketFrame(msg));
-				}
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-			finally {
-				lk.readLock().unlock();
-			}
-		}
-		
-		@Override
-		public void run()
-		{
-			while (true) {
-				send();
-				try
-				{
-					Thread.sleep(100);
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-				}
-			}
+		String talk = String.format("{ \"type\": \"talk\", \"value\": \"%s\" }", frame.text().replaceAll("\n", "\\\\n"));
+		TextWebSocketFrame newframe = new TextWebSocketFrame(talk);
+		for (Iterator<Channel> it = r.channelIterator(); it.hasNext();) {
+			Channel ch = it.next();
+			if (ch.equals(ctx.channel())) continue;
+			ch.write(newframe);
 		}
 	}
 }

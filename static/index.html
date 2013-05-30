@@ -23,31 +23,51 @@ $(document).ready(function($) {
 	    });
 	});
 
+	$.post(authurl); // set auth cookie
+	
     function registerWebsocket(ws, i) {
     	var ctr = 0;
     	ws.onmessage = function(e) {
-    		ctr++;
-    		if (ctr % 2 == 0) {
-    			$('div#msg').text(e.data);
+    		var pl = JSON.parse(e.data);
+    		if (pl.type === "word") {
+    			$('div#msg').text(pl.value);
     		}
-    		else {
-    			$('div#ctr').text(e.data);
+    		if (pl.type === "num") {
+    			$('div#ctr').text(pl.value);
+    		}
+    		if (pl.type === "talk") {
+    			console.log('got the talk: ', pl.value);
+    			$('div#ledger').append('<pre>'+pl.value+'</pre>');
     		}
         };
         
         ws.onopen = function(e) {
             ws.send(i+': Now we begin');
+            $('button#submit').click(function() {
+            	var talk = $('#talk').val();
+            	console.log('submit: ', talk);
+            	ws.send(talk);
+            });
         }
     }
     
-    $.post(authurl, function(data) {
-    	for (i = 0; i < 20; i++) {
-    		registerWebsocket(new WebSocket(wsurl), i);
-    	}
-    }); // get auth cookie
+    var num = 0;
+    function registerAndTimeout() {
+        if (++num > 1) return;
+        registerWebsocket(new WebSocket(wsurl), num);
+        window.setTimeout(registerAndTimeout, 500);
+    }
+    
+    registerAndTimeout();
+    
+    // remove auththentication
+    //$.ajax({ url: authurl, type: 'DELETE'})
 });
 </script>
 <div id="ctr">0</div>
 <div id="msg">hi</div>
+<textarea id="talk"></textarea>
+<button id="submit">submit</button>
+<div id="ledger"></div>
 </body> 
 </html>

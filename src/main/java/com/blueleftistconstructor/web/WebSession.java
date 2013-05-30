@@ -1,5 +1,7 @@
 package com.blueleftistconstructor.web;
 
+import io.netty.util.AttributeKey;
+
 import java.util.UUID;
 
 import org.glassfish.grizzly.http.Cookie;
@@ -16,6 +18,8 @@ import org.glassfish.grizzly.http.CookiesBuilder;
  */
 public class WebSession
 {
+	public static AttributeKey<WebSession> webSessionKey = new AttributeKey<WebSession>("web.session");
+	
 	private String sessionId = null;
 		
 	/*
@@ -42,7 +46,7 @@ public class WebSession
 	 * Encryption and security fields. These are used to encode session info so
 	 * it cannot easily be obtained by a 3rd party.
 	 */
-	private String encryptionKey = null;
+	//private String encryptionKey = null;
 	
 	/**
 	 * Create a new WebSession object. Must specify the information about the
