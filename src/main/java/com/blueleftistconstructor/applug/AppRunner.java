@@ -63,6 +63,13 @@ public class AppRunner implements Runnable
 		}
 	}
 	
+	/**
+	 * Process the JSON command from a client.
+	 */
+	public void enterCommand(String val) {
+		
+	}
+	
 	@Override
 	public void run()
 	{

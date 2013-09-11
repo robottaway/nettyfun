@@ -27,7 +27,8 @@ public class AppRunnerReloader implements ReloadEventProcessorPlugin
 				ru.setFieldValue(target, "running", false);
 				
 				System.out.println("Swapping in a new AppRunner with old ones state");
-				ru.setFieldValue(new UserApplicationHandler(), "ar", null);
+				ru.setFieldValue(new AppRegistry(), "ar", null);
+				ru.setFieldValue(new AppRegistry(), "t", null);
 			}
 		}
 	}

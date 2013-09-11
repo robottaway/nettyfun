@@ -1,5 +1,6 @@
 package com.blueleftistconstructor.applug;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,6 +11,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.util.AttributeKey;
+import io.netty.util.CharsetUtil;
 import static io.netty.handler.codec.http.HttpVersion.*;
 
 public class AppPlugHandler extends SimpleChannelInboundHandler<FullHttpRequest>
@@ -19,6 +21,9 @@ public class AppPlugHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 	public AppPlugHandler() {
 		super(false);
 	}
+	
+	private static final ByteBuf NOT_FOUND =
+            Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("NOT FOUND", CharsetUtil.US_ASCII));
 	
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req)
@@ -32,8 +37,9 @@ public class AppPlugHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 		
 		if (ar == null) {
 			FullHttpResponse response = new DefaultFullHttpResponse(
-                    HTTP_1_1, HttpResponseStatus.NOT_FOUND, Unpooled.wrappedBuffer("NOT FOUND".getBytes()));
+                    HTTP_1_1, HttpResponseStatus.NOT_FOUND, NOT_FOUND);
 			ctx.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+			return;
 		}
 		
 		ctx.channel().attr(appPlugKey).set(ar);

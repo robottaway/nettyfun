@@ -21,6 +21,7 @@ public class AppRegistry
 	private static AppRunner ar;
 	
 	public static synchronized AppRunner getApp(String id) {
+		if (id.equals("/burntshoes") == false) return null;
 		if (ar == null) ar = new AppRunner(durr.next());
 		if (t == null) {
 			t = new Thread(ar);
