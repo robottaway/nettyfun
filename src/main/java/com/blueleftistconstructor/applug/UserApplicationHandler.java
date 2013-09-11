@@ -1,11 +1,11 @@
 package com.blueleftistconstructor.applug;
 
-import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundMessageHandlerAdapter;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-
-import java.util.Iterator;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
 import com.blueleftistconstructor.web.WebSession;
 
@@ -16,56 +16,64 @@ import com.blueleftistconstructor.web.WebSession;
  * 
  * @author rob
  */
-public class UserApplicationHandler extends ChannelInboundMessageHandlerAdapter<TextWebSocketFrame>
-{
-	static AppRunner r = null;
-		
-	boolean registered = false;
+public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
+{		
+	ClientInvocation ci;
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception
 	{
 		cause.printStackTrace();
-		super.exceptionCaught(ctx, cause);
+		ctx.close();
 	}
 
-	synchronized static void createThread() {
-		if (r != null) return;
-		r = new AppRunner();
-		Thread t = new Thread(r);
-		t.start();
+	@Override
+	public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
+			throws Exception
+	{
+		if (evt == WebSocketServerProtocolHandler.ServerHandshakeStateEvent.HANDSHAKE_COMPLETE) {
+			configureClient(ctx);
+		}
 	}
 	
-	synchronized void register(ChannelHandlerContext ctx) {
-		if (registered == true) return;
-		r.addCtx(ctx);
-		registered = true;
+	/**
+	 * Should end up being called after websocket handshake completes. Will 
+	 * configure this client for communication with the application. 
+	 */
+	protected void configureClient(ChannelHandlerContext ctx) {
+		System.out.println("Checking auth");
+		
+		WebSession sess = ctx.channel().attr(WebSession.webSessionKey).get();
+		
+		if (sess == null) {
+			System.out.println("Closing websocket connection, no session found");
+			ctx.writeAndFlush(new CloseWebSocketFrame(400, "NO SESSION FOUND")).addListener(ChannelFutureListener.CLOSE);
+			return;
+		}
+		
+		System.out.println("Got session id: "+sess.getSessionId());
+		
+		AppRunner ar = ctx.channel().attr(AppPlugHandler.appPlugKey).get();
+		ar.addCtx(ctx);
+		
+		ci = new ClientInvocation(ctx, ar)
+		{
+			@Override
+			public void invoke(String val)
+			{
+				this.sendToAll(val);
+			}
+		};
 	}
-	
+
 	/**
 	 * When a message is sent into the app by the connected user this is 
 	 * invoked.
 	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, TextWebSocketFrame frame) throws Exception
+	protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame frame) throws Exception
 	{
-		if (r == null) {
-			createThread();
-		}
-		if (registered == false) {
-			register(ctx);
-		}
-		
-		WebSession sess = ctx.channel().attr(WebSession.webSessionKey).get();
-		if (sess != null) System.out.println("Got session id: "+sess.getSessionId());
-		
-		String talk = String.format("{ \"type\": \"talk\", \"value\": \"%s\" }", frame.text().replaceAll("\n", "\\\\n"));
-		TextWebSocketFrame newframe = new TextWebSocketFrame(talk);
-		for (Iterator<Channel> it = r.channelIterator(); it.hasNext();) {
-			Channel ch = it.next();
-			if (ch.equals(ctx.channel())) continue;
-			ch.write(newframe);
-		}
+		ci.invoke(frame.text());
 	}
 }

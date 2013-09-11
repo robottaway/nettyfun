@@ -6,14 +6,14 @@
 <body>
 <script>
 var authurl = "http://mb.blueleftistconstructor.com:8082/user/auth";
-var wsurl = 'ws://farm.blueleftistconstructor.com:8080/ws';
+var wsurl = 'ws://farm.blueleftistconstructor.com:8080/burntshoes';
 var ws = null;
 $(document).ready(function($) {
 	// setup calls for credential based CORs
 	var methods = ['POST', 'PUT', 'DELETE'];
 	$.each(methods, function(i, method) {
 		$.ajaxSetup({
-	        type: "POST",
+	        type: method,
 	        data: {},
 	        dataType: 'json',
 	        xhrFields: {
@@ -27,6 +27,17 @@ $(document).ready(function($) {
 	
     function registerWebsocket(ws, i) {
     	var ctr = 0;
+    	
+    	ws.onclose = function(e) {
+    		console.log('close connection');
+    		console.log(e);
+    	}
+    	
+    	ws.onerror = function(e) {
+    		console.log('error with websocket');
+    		console.log(e);
+    	}
+    	
     	ws.onmessage = function(e) {
     		var pl = JSON.parse(e.data);
     		if (pl.type === "word") {
@@ -64,8 +75,8 @@ $(document).ready(function($) {
     //$.ajax({ url: authurl, type: 'DELETE'})
 });
 </script>
-<div id="ctr">0</div>
-<div id="msg">hi</div>
+<div id="ctr"></div>
+<div id="msg"></div>
 <textarea id="talk"></textarea>
 <button id="submit">submit</button>
 <div id="ledger"></div>

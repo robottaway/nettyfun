@@ -18,7 +18,7 @@ import org.glassfish.grizzly.http.CookiesBuilder;
  */
 public class WebSession
 {
-	public static AttributeKey<WebSession> webSessionKey = new AttributeKey<WebSession>("web.session");
+	public static final AttributeKey<WebSession> webSessionKey = new AttributeKey<WebSession>("web.session");
 	
 	private String sessionId = null;
 		

@@ -3,15 +3,13 @@ package com.blueleftistconstructor.applug;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-
-import java.net.InetSocketAddress;
 
 import org.springsource.loaded.agent.SpringLoadedPreProcessor;
 
@@ -32,12 +30,14 @@ public class AppPlugServer
 			port = Integer.parseInt(args[0]);
 		}
 		
-		final ServerBootstrap sb = new ServerBootstrap();
+		EventLoopGroup bossGroup = new NioEventLoopGroup();
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		
 		try
 		{
-			sb.group(new NioEventLoopGroup(), new NioEventLoopGroup())
+			ServerBootstrap sb = new ServerBootstrap();
+			sb.group(bossGroup, workerGroup)
 				.channel(NioServerSocketChannel.class)
-				.localAddress(new InetSocketAddress(port))
 				.childHandler(
 					new ChannelInitializer<SocketChannel>()
 					{
@@ -49,21 +49,23 @@ public class AppPlugServer
 									new HttpRequestDecoder(),
 									new HttpObjectAggregator(65536),
 									new HttpResponseEncoder(),
-									new HttpAuthHandler(),
-									new WebSocketServerProtocolHandler("/ws"),
-									new UserApplicationHandler());
+									new HttpSessionHandler(),
+									new AppPlugHandler(),
+									new UserApplicationHandler()
+							);
 						}
 					}
 				);
 
-			final Channel ch = sb.bind().sync().channel();
+			final Channel ch = sb.bind(port).sync().channel();
 			System.out.println("Web socket server started at port " + port);
 
 			ch.closeFuture().sync();
 		}
 		finally
 		{
-			sb.shutdown();
+			bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
 		}
 	}
 }

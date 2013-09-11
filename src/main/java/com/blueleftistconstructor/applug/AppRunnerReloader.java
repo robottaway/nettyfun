@@ -25,8 +25,9 @@ public class AppRunnerReloader implements ReloadEventProcessorPlugin
 			if (target != null && target.getClass().equals(AppRunner.class)) {
 				System.out.println("Found AppRunner thread, interrupting it you will likely see some InterruptedExceptions!");
 				ru.setFieldValue(target, "running", false);
+				
 				System.out.println("Swapping in a new AppRunner with old ones state");
-				ru.setFieldValue(new UserApplicationHandler(), "r", null);	
+				ru.setFieldValue(new UserApplicationHandler(), "ar", null);
 			}
 		}
 	}
