@@ -18,7 +18,7 @@ import com.blueleftistconstructor.web.WebSession;
  */
 public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 {		
-	ClientInvocation ci;
+	ClientHandler ci;
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
@@ -28,6 +28,10 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 		ctx.close();
 	}
 
+	/**
+	 * We implement this to catch the websocket handshake completing 
+	 * successfully. At that point we'll setup this client connection.
+	 */
 	@Override
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
 			throws Exception
@@ -54,17 +58,10 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 		
 		System.out.println("Got session id: "+sess.getSessionId());
 		
-		AppRunner ar = ctx.channel().attr(AppPlugHandler.appPlugKey).get();
-		ar.addCtx(ctx);
+		// TODO how to work in the user model to all this
 		
-		ci = new ClientInvocation(ctx, ar)
-		{
-			@Override
-			public void invoke(String val)
-			{
-				this.sendToAll(val);
-			}
-		};
+		AppPlug ap = ctx.channel().attr(AppPlugHandler.appPlugKey).get();		
+		ci = ap.getClientHandlerForContext(ctx);
 	}
 
 	/**
@@ -74,6 +71,6 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame frame) throws Exception
 	{
-		ci.invoke(frame.text());
+		ci.handle(frame.text());
 	}
 }

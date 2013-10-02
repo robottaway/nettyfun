@@ -18,11 +18,11 @@ public class AppRegistry
 	
 	private static Thread t = null;
 	
-	private static AppRunner ar;
+	private static ChattyRunner ar;
 	
-	public static synchronized AppRunner getApp(String id) {
+	public static synchronized ChattyRunner getApp(String id) {
 		if (id.equals("/burntshoes") == false) return null;
-		if (ar == null) ar = new AppRunner(durr.next());
+		if (ar == null) ar = new ChattyRunner(durr.next());
 		if (t == null) {
 			t = new Thread(ar);
 			t.start();

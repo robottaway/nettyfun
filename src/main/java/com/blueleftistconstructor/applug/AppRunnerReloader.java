@@ -22,7 +22,7 @@ public class AppRunnerReloader implements ReloadEventProcessorPlugin
 		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
 		for (Thread t : threadSet) {
 			Object target = ru.getFieldValue(t, "target");
-			if (target != null && target.getClass().equals(AppRunner.class)) {
+			if (target != null && target.getClass().equals(ChattyRunner.class)) {
 				System.out.println("Found AppRunner thread, interrupting it you will likely see some InterruptedExceptions!");
 				ru.setFieldValue(target, "running", false);
 				
