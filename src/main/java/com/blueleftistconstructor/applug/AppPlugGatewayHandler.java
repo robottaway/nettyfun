@@ -21,11 +21,11 @@ import static io.netty.handler.codec.http.HttpVersion.*;
  * @author rob
  *
  */
-public class AppPlugHandler extends SimpleChannelInboundHandler<FullHttpRequest>
+public class AppPlugGatewayHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 {
 	public static final AttributeKey<ChattyRunner> appPlugKey = new AttributeKey<ChattyRunner>("app.plug");
 	
-	public AppPlugHandler() {
+	public AppPlugGatewayHandler() {
 		super(false);
 	}
 	

@@ -60,7 +60,7 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 		
 		// TODO how to work in the user model to all this
 		
-		AppPlug ap = ctx.channel().attr(AppPlugHandler.appPlugKey).get();		
+		AppPlug ap = ctx.channel().attr(AppPlugGatewayHandler.appPlugKey).get();		
 		ci = ap.getClientHandlerForContext(ctx);
 	}
 
