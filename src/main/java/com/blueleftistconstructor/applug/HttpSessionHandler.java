@@ -7,9 +7,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import com.blueleftistconstructor.web.SessionNotInCookieHeader;
 import com.blueleftistconstructor.web.WebSession;
 
-/**
- * Will implement layer connecting the HTTP layer to the websocket layer.
- * 
+/** 
  * Will attempt to find the requestor's session cookie. If the cookie is not
  * found an error message will be returned with a HTTP 400 response code.
  *

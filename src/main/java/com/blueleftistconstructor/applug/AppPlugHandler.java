@@ -14,6 +14,13 @@ import io.netty.util.AttributeKey;
 import io.netty.util.CharsetUtil;
 import static io.netty.handler.codec.http.HttpVersion.*;
 
+/**
+ * Before we even venture into processing the websocket we first check that an
+ * application exists for the URI requested.
+ * 
+ * @author rob
+ *
+ */
 public class AppPlugHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 {
 	public static final AttributeKey<ChattyRunner> appPlugKey = new AttributeKey<ChattyRunner>("app.plug");
@@ -33,19 +40,22 @@ public class AppPlugHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 	
 		System.out.println("Going to look up the app plug for uri: "+uri);
 		
-		ChattyRunner ar = AppRegistry.getApp(uri);
+		ChattyRunner ap = AppRegistry.getApp(uri);
 		
-		if (ar == null) {
+		if (ap == null) {
 			FullHttpResponse response = new DefaultFullHttpResponse(
                     HTTP_1_1, HttpResponseStatus.NOT_FOUND, NOT_FOUND);
 			ctx.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
 			return;
 		}
 		
-		ctx.channel().attr(appPlugKey).set(ar);
+		ctx.channel().attr(appPlugKey).set(ap);
 		
 		// add websocket handler for the request uri if application found
-		ctx.pipeline().addAfter(ctx.name(), HttpSessionHandler.class.getName(), new WebSocketServerProtocolHandler(uri));
+		ctx.pipeline().addLast(new WebSocketServerProtocolHandler(uri));
+		
+		// now add our application handler
+		ctx.pipeline().addLast(new UserApplicationHandler());
 		
 		// remove, app is attached and websocket handler in place
 		ctx.pipeline().remove(this);

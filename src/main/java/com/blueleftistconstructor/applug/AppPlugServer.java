@@ -50,8 +50,7 @@ public class AppPlugServer
 									new HttpObjectAggregator(65536),
 									new HttpResponseEncoder(),
 									new HttpSessionHandler(),
-									new AppPlugHandler(),
-									new UserApplicationHandler()
+									new AppPlugHandler()
 							);
 						}
 					}
