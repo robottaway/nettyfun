@@ -5,7 +5,6 @@ package com.blueleftistconstructor.applug;
  * application.
  * 
  * @author rob
- *
  */
 public interface ClientOps
 {
@@ -18,9 +17,4 @@ public interface ClientOps
 	 * Write back string to user
 	 */
 	void writeBack(String val);
-	
-	/**
-	 * Send a command to the application
-	 */
-	void commandApplication(String val);
 }

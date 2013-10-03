@@ -10,11 +10,24 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public abstract class AppPlug
+import org.azeckoski.reflectutils.ReflectUtils;
+
+/**
+ * Base class to extend for the application.
+ * 
+ * @author rob
+ */
+public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A>>
 {
 	private final DefaultChannelGroup chGroup;
 		
-	public AppPlug(EventExecutor evtEx) {
+	private final Class<? extends B> clientHandlerClass;
+	
+	/**
+	 * TODO: maybe these should be setters?
+	 */
+	public AppPlug(Class<? extends B> clientHandlerClass, EventExecutor evtEx) {
+		this.clientHandlerClass = clientHandlerClass;
 		this.chGroup = new DefaultChannelGroup(evtEx);
 	}
 	
@@ -28,7 +41,7 @@ public abstract class AppPlug
 	 */
 	protected ClientOps registerClientContext(final ChannelHandlerContext ctx) {
 		chGroup.add(ctx.channel());
-		final AppPlug ap = this;
+		final AppPlug<A, B> ap = this;
 		// TODO: probably want to add the ClientOps to the user mode too
 		return new ClientOps()
 		{
@@ -40,14 +53,6 @@ public abstract class AppPlug
 			@Override
 			public void writeBack(String val) {
 				ctx.writeAndFlush(new TextWebSocketFrame(val));
-			}
-
-			@Override
-			public void commandApplication(String val)
-			{
-				// TODO: user mode, should have context so application can 
-				//       message back info about command run.
-				ap.handleClientCommand(val);
 			}
 		};
 	}
@@ -82,10 +87,12 @@ public abstract class AppPlug
 	 * Get a client handler, responsible for processing the websocket values
 	 * passed in by the client.
 	 */
-	abstract public ClientHandler getClientHandlerForContext(ChannelHandlerContext ctx);
-	
-	/**
-	 * Handle a command from a given client (user).
-	 */
-	abstract protected void handleClientCommand(/*user model?, */ String val);
+	protected B getClientHandlerForContext(ChannelHandlerContext ctx)
+	{
+		B inst = ReflectUtils.getInstance().constructClass(clientHandlerClass);
+		ClientOps ops = this.registerClientContext(ctx);
+		ReflectUtils.getInstance().setFieldValue(inst, "ops", ops);
+		ReflectUtils.getInstance().setFieldValue(inst, "appPlug", this);
+		return inst;
+	}
 }

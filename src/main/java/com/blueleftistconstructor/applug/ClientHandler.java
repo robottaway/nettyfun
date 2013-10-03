@@ -6,7 +6,9 @@ package com.blueleftistconstructor.applug;
  * @author rob
  *
  */
-public interface ClientHandler
+public interface ClientHandler<A extends AppPlug<?,?>>
 {
 	public void handle(String val);
+		
+	public A getAppPlug();
 }

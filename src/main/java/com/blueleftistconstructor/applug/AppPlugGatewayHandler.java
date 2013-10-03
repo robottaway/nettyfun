@@ -23,7 +23,7 @@ import static io.netty.handler.codec.http.HttpVersion.*;
  */
 public class AppPlugGatewayHandler extends SimpleChannelInboundHandler<FullHttpRequest>
 {
-	public static final AttributeKey<ChattyRunner> appPlugKey = new AttributeKey<ChattyRunner>("app.plug");
+	public static final AttributeKey<AppPlug<?,?>> appPlugKey = new AttributeKey<AppPlug<?,?>>("app.plug");
 	
 	public AppPlugGatewayHandler() {
 		super(false);
@@ -40,7 +40,7 @@ public class AppPlugGatewayHandler extends SimpleChannelInboundHandler<FullHttpR
 	
 		System.out.println("Going to look up the app plug for uri: "+uri);
 		
-		ChattyRunner ap = AppRegistry.getApp(uri);
+		AppPlug<?,?> ap = AppRegistry.getApp(uri);
 		
 		if (ap == null) {
 			FullHttpResponse response = new DefaultFullHttpResponse(
@@ -51,7 +51,7 @@ public class AppPlugGatewayHandler extends SimpleChannelInboundHandler<FullHttpR
 		
 		ctx.channel().attr(appPlugKey).set(ap);
 		
-		// add websocket handler for the request uri if application found
+		// add websocket handler for the request uri where app lives
 		ctx.pipeline().addLast(new WebSocketServerProtocolHandler(uri));
 		
 		// now add our application handler

@@ -1,38 +1,36 @@
 package com.blueleftistconstructor.applug;
 
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.EventExecutor;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A place where the code for long running application being connected to by
  * one or more clients would go.
  * 
  * @author rob
- *
  */
-public class ChattyRunner extends AppPlug implements Runnable
+public class ChattyRunner extends AppPlug<ChattyRunner, ChattyClientHandler> implements Runnable
 {	
 	// not exposed, can be modified through reflection if needed
 	private boolean running = true;
 	
-	int ctr = 0;
+	private int ctr = 0;
 	
-	final String[] messages = {"toodles!", "siyonara!", "bonjour", "snoooowy", 
-			"bada bing", "blimey", "cocooco", "knckrs", "sppemonkey", "zzzzzzzzz" };
+	private Set<String> messages = new HashSet<String>();
+	
+	private final String[] initMessages = new String[]{"toodles!", "siyonara!", "bonjour", "bada bing", "blimey"};
 	
 	public ChattyRunner(EventExecutor evtEx) {
-		super(evtEx);
+		super(ChattyClientHandler.class, evtEx);
+		for (String message : initMessages) {
+			messages.add(message);
+		}
 	}
 	
-	/**
-	 * First we add the context to the plug making it avaible for group 
-	 * messaging, then we create a handler and return it.
-	 */
-	@Override
-	public ClientHandler getClientHandlerForContext(ChannelHandlerContext ctx)
-	{
-		ClientOps ops = this.registerClientContext(ctx);
-		return new ChattyClientHandler(ops);
+	public synchronized boolean addMessage(String message) {
+		return messages.add(message);
 	}
 
 	/**
@@ -49,7 +47,8 @@ public class ChattyRunner extends AppPlug implements Runnable
 				String num = String.format("{ \"type\":\"num\", \"value\": %s }", ctr);
 				sendAll(num);
 				
-				String word = String.format("{ \"type\":\"word\", \"value\": \"%s\" }", messages[ctr % messages.length]);
+				String message = messages.toArray(new String[]{})[ctr % messages.size()];
+				String word = String.format("{ \"type\":\"word\", \"value\": \"%s\" }", message);
 				sendAll(word);
 				
 				flushAllClients();
@@ -61,11 +60,5 @@ public class ChattyRunner extends AppPlug implements Runnable
 				return;
 			}
 		}
-	}
-
-	@Override
-	protected void handleClientCommand(String val)
-	{
-		// TODO Auto-generated method stub
 	}
 }
