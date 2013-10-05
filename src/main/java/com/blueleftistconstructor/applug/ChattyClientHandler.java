@@ -11,6 +11,7 @@ public class ChattyClientHandler extends BaseClientHandler<ChattyRunner>
 	public void handle(String val)
 	{
 		val = val.trim();
+		
 		if (val.startsWith("addmessage")) {
 			String[] parts = val.split("addmessage");
 			if (parts.length > 1 && parts[1].trim().length() > 0) {

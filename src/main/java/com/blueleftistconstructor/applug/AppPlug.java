@@ -91,8 +91,9 @@ public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A
 	{
 		B inst = ReflectUtils.getInstance().constructClass(clientHandlerClass);
 		ClientOps ops = this.registerClientContext(ctx);
-		ReflectUtils.getInstance().setFieldValue(inst, "ops", ops);
-		ReflectUtils.getInstance().setFieldValue(inst, "appPlug", this);
+		ReflectUtils ru = ReflectUtils.getInstance();
+		ru.setFieldValue(inst, "ops", ops);
+		ru.setFieldValue(inst, "appPlug", this);
 		return inst;
 	}
 }

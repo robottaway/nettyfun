@@ -19,8 +19,16 @@ public abstract class BaseClientHandler<A extends AppPlug<?,?>> implements Clien
 	
 	private A appPlug;
 	
+	public final void setOps(ClientOps ops) {
+		this.ops = ops;
+	}
+	
 	public ClientOps getOps() {
 		return ops;
+	}
+	
+	public final void setAppPlug(A plug) {
+		this.appPlug = plug;
 	}
 	
 	public A getAppPlug() {
