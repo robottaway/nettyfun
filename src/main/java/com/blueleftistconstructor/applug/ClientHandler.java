@@ -11,4 +11,6 @@ public interface ClientHandler<A extends AppPlug<?,?>>
 	public void handle(String val);
 		
 	public A getAppPlug();
+	
+	public ClientOps getOps();
 }

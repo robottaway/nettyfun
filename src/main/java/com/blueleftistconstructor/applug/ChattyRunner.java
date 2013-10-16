@@ -18,7 +18,7 @@ public class ChattyRunner extends AppPlug<ChattyRunner, ChattyClientHandler> imp
 	
 	private int ctr = 0;
 	
-	private Set<String> messages = new HashSet<String>();
+	private final Set<String> messages = new HashSet<String>();
 	
 	private final String[] initMessages = new String[]{"toodles!", "siyonara!", "bonjour", "bada bing", "blimey"};
 	

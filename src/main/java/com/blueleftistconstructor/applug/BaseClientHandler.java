@@ -15,23 +15,15 @@ package com.blueleftistconstructor.applug;
  */
 public abstract class BaseClientHandler<A extends AppPlug<?,?>> implements ClientHandler<A>
 {
-	private ClientOps ops;
+	private ClientOps _ops;
 	
-	private A appPlug;
-	
-	public final void setOps(ClientOps ops) {
-		this.ops = ops;
-	}
+	private A _appPlug;
 	
 	public ClientOps getOps() {
-		return ops;
-	}
-	
-	public final void setAppPlug(A plug) {
-		this.appPlug = plug;
+		return _ops;
 	}
 	
 	public A getAppPlug() {
-		return appPlug;
+		return _appPlug;
 	}
 }

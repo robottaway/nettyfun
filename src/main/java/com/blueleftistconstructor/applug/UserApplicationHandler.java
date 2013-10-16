@@ -18,8 +18,8 @@ import com.blueleftistconstructor.web.WebSession;
  */
 public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 {		
-	ClientHandler<?> ci;
-	
+	private ClientHandler<?> ci;
+		
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception
@@ -48,19 +48,30 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 	protected void configureClient(ChannelHandlerContext ctx) {
 		System.out.println("Checking auth");
 		
+		// TODO: we should support many different authentication standards here
+		// building and auth token and passing it down where the AppPlug can
+		// then build the actual user and bind it with the contexts channel.
+		
 		WebSession sess = ctx.channel().attr(WebSession.webSessionKey).get();
+		// or basic, or digest..
+		// possibly OAuth
+		// even facebook or google?
+		
+		// we now have some principal for the user, from whatever authentication format we used.
+		// call webservice to get user data such as authorities, and possibly any channel specific config (ignores, preferences)
+		// when webservice is called it can register that the user is on the given server, later if the user model get's 
+		// changed we should fire an event to this AppPlug and update the user model here (privileges comes to mind).
+		// add user data to context.
 		
 		if (sess == null) {
-			System.out.println("Closing websocket connection, no session found");
-			ctx.writeAndFlush(new CloseWebSocketFrame(400, "NO SESSION FOUND")).addListener(ChannelFutureListener.CLOSE);
+			System.out.println("Closing websocket connection, unable to authenticate");
+			ctx.writeAndFlush(new CloseWebSocketFrame(400, "UNABLE TO AUTHENTICATE")).addListener(ChannelFutureListener.CLOSE);
 			return;
 		}
 		
 		System.out.println("Got session id: "+sess.getSessionId());
-		
-		// TODO how to work in the user model to all this
-		
-		AppPlug<?,?> ap = ctx.channel().attr(AppPlugGatewayHandler.appPlugKey).get();		
+
+		AppPlug<?,?> ap = ctx.channel().attr(AppPlugGatewayHandler.appPlugKey).get();
 		ci = ap.getClientHandlerForContext(ctx);
 	}
 

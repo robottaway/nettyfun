@@ -9,12 +9,22 @@ package com.blueleftistconstructor.applug;
 public interface ClientOps
 {
 	/**
-	 * Send to all others connected to resource
+	 * Send to all other connected to resource
 	 */
 	void sendToAllOthers(String val);
 	
 	/**
-	 * Write back string to user
+	 * Write back string to client
 	 */
 	void writeBack(String val);
+	
+	/**
+	 * Write to given user.
+	 */
+	void sendToUser(User user, String val);
+	
+	/**
+	 * Write to user with given username
+	 */
+	void sendToUsername(String username, String val);
 }

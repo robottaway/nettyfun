@@ -1,6 +1,8 @@
 package com.blueleftistconstructor.applug;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -23,6 +25,8 @@ public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A
 		
 	private final Class<? extends B> clientHandlerClass;
 	
+	//??? private final Set<User> users = new HashSet<User>();
+	
 	/**
 	 * TODO: maybe these should be setters?
 	 */
@@ -35,12 +39,22 @@ public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A
 		return chGroup.iterator();
 	}
 	
+	private final ChannelFutureListener remover = new ChannelFutureListener()
+	{
+		@Override
+		public void operationComplete(ChannelFuture future) throws Exception
+		{
+			System.out.println("im gone baybay");
+		}
+	};
+	
 	/**
 	 * Add given Netty context to channel group and build operations to return
 	 * for use in buidling a client handler.
 	 */
 	protected ClientOps registerClientContext(final ChannelHandlerContext ctx) {
 		chGroup.add(ctx.channel());
+		ctx.channel().closeFuture().addListener(remover);
 		final AppPlug<A, B> ap = this;
 		// TODO: probably want to add the ClientOps to the user mode too
 		return new ClientOps()
@@ -53,6 +67,20 @@ public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A
 			@Override
 			public void writeBack(String val) {
 				ctx.writeAndFlush(new TextWebSocketFrame(val));
+			}
+
+			@Override
+			public void sendToUser(User user, String val)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void sendToUsername(String username, String val)
+			{
+				// TODO Auto-generated method stub
+				
 			}
 		};
 	}
@@ -82,18 +110,18 @@ public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A
 	protected void flushAllClients() {
 		chGroup.flush();
 	}
-	
+
 	/**
 	 * Get a client handler, responsible for processing the websocket values
 	 * passed in by the client.
 	 */
 	protected B getClientHandlerForContext(ChannelHandlerContext ctx)
 	{
-		B inst = ReflectUtils.getInstance().constructClass(clientHandlerClass);
 		ClientOps ops = this.registerClientContext(ctx);
 		ReflectUtils ru = ReflectUtils.getInstance();
-		ru.setFieldValue(inst, "ops", ops);
-		ru.setFieldValue(inst, "appPlug", this);
+		B inst = ru.constructClass(clientHandlerClass);
+		ru.setFieldValue(inst, "_ops", ops);
+		ru.setFieldValue(inst, "_appPlug", this);
 		return inst;
 	}
 }
