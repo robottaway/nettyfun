@@ -1,5 +1,8 @@
 package com.blueleftistconstructor.applug;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -25,6 +28,8 @@ public class AppPlugGatewayHandler extends SimpleChannelInboundHandler<FullHttpR
 {
 	public static final AttributeKey<AppPlug<?,?>> appPlugKey = new AttributeKey<AppPlug<?,?>>("app.plug");
 	
+	public static final Logger logger = LoggerFactory.getLogger(AppPlugGatewayHandler.class);
+	
 	public AppPlugGatewayHandler() {
 		super(false);
 	}
@@ -37,12 +42,11 @@ public class AppPlugGatewayHandler extends SimpleChannelInboundHandler<FullHttpR
 			throws Exception
 	{
 		String uri = req.getUri();
-	
-		System.out.println("Going to look up the app plug for uri: "+uri);
-		
+			
 		AppPlug<?,?> ap = AppRegistry.getApp(uri);
 		
 		if (ap == null) {
+			logger.info("No AppPlug found for uri (id) '{}'", uri);
 			FullHttpResponse response = new DefaultFullHttpResponse(
                     HTTP_1_1, HttpResponseStatus.NOT_FOUND, NOT_FOUND);
 			ctx.channel().writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);

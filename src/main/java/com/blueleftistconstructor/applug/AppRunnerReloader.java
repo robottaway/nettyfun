@@ -3,6 +3,8 @@ package com.blueleftistconstructor.applug;
 import java.util.Set;
 
 import org.azeckoski.reflectutils.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springsource.loaded.ReloadEventProcessorPlugin;
 
 /**
@@ -14,7 +16,8 @@ import org.springsource.loaded.ReloadEventProcessorPlugin;
  */
 public class AppRunnerReloader implements ReloadEventProcessorPlugin
 {
-
+	private static final Logger logger = LoggerFactory.getLogger(AppRunnerReloader.class);
+	
 	@Override
 	public void reloadEvent(String arg0, Class<?> arg1, String arg2)
 	{
@@ -23,10 +26,10 @@ public class AppRunnerReloader implements ReloadEventProcessorPlugin
 		for (Thread t : threadSet) {
 			Object target = ru.getFieldValue(t, "target");
 			if (target != null && target.getClass().equals(ChattyRunner.class)) {
-				System.out.println("Found AppRunner thread, interrupting it you will likely see some InterruptedExceptions!");
+				logger.warn("Found AppRunner thread, interrupting it you will likely see some InterruptedExceptions!");
 				ru.setFieldValue(target, "running", false);
 				
-				System.out.println("Swapping in a new AppRunner with old ones state");
+				logger.warn("Swapping in a new AppRunner with old ones state");
 				ru.setFieldValue(new AppRegistry(), "ar", null);
 				ru.setFieldValue(new AppRegistry(), "t", null);
 			}

@@ -13,6 +13,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.azeckoski.reflectutils.ReflectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class to extend for the application.
@@ -24,6 +26,8 @@ public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A
 	private final DefaultChannelGroup chGroup;
 		
 	private final Class<? extends B> clientHandlerClass;
+	
+	private static final Logger logger = LoggerFactory.getLogger(AppPlug.class);
 	
 	//??? private final Set<User> users = new HashSet<User>();
 	
@@ -44,7 +48,9 @@ public abstract class AppPlug<A extends AppPlug<A, B>, B extends ClientHandler<A
 		@Override
 		public void operationComplete(ChannelFuture future) throws Exception
 		{
-			System.out.println("im gone baybay");
+			// Update this message with better info about who discons.
+			// prob a candidate for rich event logging to datastore 
+			logger.debug("Client XXX disconnected");
 		}
 	};
 	

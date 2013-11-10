@@ -5,3 +5,4 @@ target
 .DS_Store
 *swp
 /test-output
+src/test/resources/logback-test.xml

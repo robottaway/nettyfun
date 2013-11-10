@@ -11,6 +11,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springsource.loaded.agent.SpringLoadedPreProcessor;
 
 
@@ -21,6 +23,8 @@ import org.springsource.loaded.agent.SpringLoadedPreProcessor;
  */
 public class AppPlugServer
 {
+	private static final Logger logger = LoggerFactory.getLogger(AppPlugServer.class);
+	
 	public static void main(String[] args) throws Exception
 	{
 		SpringLoadedPreProcessor.registerGlobalPlugin(new AppRunnerReloader());
@@ -57,7 +61,7 @@ public class AppPlugServer
 				);
 
 			final Channel ch = sb.bind(port).sync().channel();
-			System.out.println("Web socket server started at port " + port);
+			logger.info("Web socket server started at port {}", port);
 
 			ch.closeFuture().sync();
 		}

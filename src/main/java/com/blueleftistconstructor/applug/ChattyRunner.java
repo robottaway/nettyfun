@@ -5,6 +5,9 @@ import io.netty.util.concurrent.EventExecutor;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * A place where the code for long running application being connected to by
  * one or more clients would go.
@@ -12,7 +15,9 @@ import java.util.Set;
  * @author rob
  */
 public class ChattyRunner extends AppPlug<ChattyRunner, ChattyClientHandler> implements Runnable
-{	
+{
+	private static final Logger logger = LoggerFactory.getLogger(ChattyRunner.class);
+	
 	// not exposed, can be modified through reflection if needed
 	private boolean running = true;
 	
@@ -40,7 +45,8 @@ public class ChattyRunner extends AppPlug<ChattyRunner, ChattyClientHandler> imp
 	@Override
 	public void run()
 	{
-		System.out.println("We start running......");
+		logger.info("{} has started running......", ChattyRunner.class.getName());
+		
 		while (running) {
 			try {
 				ctr++;

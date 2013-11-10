@@ -1,0 +1,27 @@
+<!--
+Make copy of this file for your environment, do not check it in. It's name 
+should be: 
+
+    logback-test.xml
+
+If there are any logging changes that you think should be shared among devs you
+should get feedback, and if agreed upon add them here so others can use them.
+-->
+
+<configuration>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- encoders are assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="warn">
+    <appender-ref ref="STDOUT" />
+  </root>
+  
+  <logger name="com.blueleftistconstructor" level="info" />
+  
+</configuration>

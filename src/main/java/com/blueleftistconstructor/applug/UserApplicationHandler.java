@@ -1,5 +1,8 @@
 package com.blueleftistconstructor.applug;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -20,11 +23,13 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 {		
 	private ClientHandler<?> ci;
 		
+	private static final Logger logger = LoggerFactory.getLogger(UserApplicationHandler.class);
+	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
 			throws Exception
 	{
-		cause.printStackTrace();
+		logger.error("Error caught while processing users applicaion.", cause);
 		ctx.close();
 	}
 
@@ -46,13 +51,14 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 	 * configure this client for communication with the application. 
 	 */
 	protected void configureClient(ChannelHandlerContext ctx) {
-		System.out.println("Checking auth");
+		logger.debug("Checking auth");
 		
 		// TODO: we should support many different authentication standards here
 		// building and auth token and passing it down where the AppPlug can
 		// then build the actual user and bind it with the contexts channel.
 		
 		WebSession sess = ctx.channel().attr(WebSession.webSessionKey).get();
+		
 		// or basic, or digest..
 		// possibly OAuth
 		// even facebook or google?
@@ -64,12 +70,12 @@ public class UserApplicationHandler extends SimpleChannelInboundHandler<TextWebS
 		// add user data to context.
 		
 		if (sess == null) {
-			System.out.println("Closing websocket connection, unable to authenticate");
+			logger.info("Closing websocket connection, unable to authenticate");
 			ctx.writeAndFlush(new CloseWebSocketFrame(400, "UNABLE TO AUTHENTICATE")).addListener(ChannelFutureListener.CLOSE);
 			return;
 		}
 		
-		System.out.println("Got session id: "+sess.getSessionId());
+		logger.debug("Got session id: "+sess.getSessionId());
 
 		AppPlug<?,?> ap = ctx.channel().attr(AppPlugGatewayHandler.appPlugKey).get();
 		ci = ap.getClientHandlerForContext(ctx);
